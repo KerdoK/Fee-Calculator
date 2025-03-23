@@ -58,7 +58,13 @@ app.UseHttpsRedirection();
 WeatherDataRepositoryDb repo = new WeatherDataRepositoryDb(new AppDbContext(contextOptions));
 // repo.FetchWeatherData(); // to get the most recent weather data
 
-
+/*
+ * Endpoint: GET /weatherdata
+ *
+ * Shows all the collected weather data from the database.
+ *
+ * returns: 200 OK - this response contains info about the weather data.
+ */
 app.MapGet("/weatherdata", () =>
     {
         var data = repo.GetWeatherDataFromDb();
@@ -66,7 +72,17 @@ app.MapGet("/weatherdata", () =>
     })
     .WithName("GetWeatherData");
 
-
+/*
+ * Endpoint: GET /courierfee
+ *
+ * Calculates the delivery fee based on weather data from the specified city and the vehicle type
+ *
+ * param: city - the name of the city we want to deliver in.
+ * param: vehicle - the type of vehicle we want to use for deliveries.
+ *
+ * returns: 200 OK - this response contains info about the fee amount, currency used and a success message.
+ * returns: 400 Bad Request - this response contains info about what went wrong by giving an error message.
+ */
 app.MapGet("/courierfee", (string city, string vehicle) =>
     {
         if (!InputValidator.ValidateCity(city))
