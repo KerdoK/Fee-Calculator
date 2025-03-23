@@ -7,7 +7,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "!SolutionItems", "!SolutionItems", "{255EF883-1982-4FAF-953E-510FF3FB4934}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.Props = Directory.Build.Props
-		README.md = README.md
+		Commands.md = Commands.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{92560AFB-F9E8-4B95-9A74-71C8A366DFDF}"

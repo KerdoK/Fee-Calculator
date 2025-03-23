@@ -1,9 +1,4 @@
 using BLL;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Abstractions;
-using Microsoft.Identity.Web.Resource;
 using DAL;
 using Hangfire;
 using Hangfire.SQLite;
@@ -13,7 +8,6 @@ using WebAPI;
 var builder = WebApplication.CreateBuilder(args);
 
 
-// database connection
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -23,28 +17,23 @@ var contextOptions = new DbContextOptionsBuilder<AppDbContext>()
     .EnableSensitiveDataLogging()
     .Options;
 
-
 builder.Services.AddHangfire(config => { config.UseSQLiteStorage(connectionString); });
 
 int workerCount = 1;
 builder.Services.AddHangfireServer(options => { options.WorkerCount = workerCount; });
 
-
-// Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(connectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+
 app.UseHangfireDashboard("/hangfire");
 
-// Step 4: Define a cron job (e.g., fetching weather data every hour)
 var recurringJobId = "Recurring-Job-For-Weather-Data";
 var cronExpression = "15 * * * *";
 var timeZone = TimeZoneInfo.Local;
@@ -59,7 +48,6 @@ RecurringJob.AddOrUpdate<WeatherDataRepositoryDb>(
     }
 );
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -68,7 +56,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 WeatherDataRepositoryDb repo = new WeatherDataRepositoryDb(new AppDbContext(contextOptions));
-// repo.FetchWeatherData();
+// repo.FetchWeatherData(); // to get the most recent weather data
 
 
 app.MapGet("/weatherdata", () =>
@@ -77,6 +65,7 @@ app.MapGet("/weatherdata", () =>
         return data;
     })
     .WithName("GetWeatherData");
+
 
 app.MapGet("/courierfee", (string city, string vehicle) =>
     {
@@ -101,7 +90,7 @@ app.MapGet("/courierfee", (string city, string vehicle) =>
         {
             return Results.BadRequest(e.Message);
         }
-        
+
         try
         {
             var data = repo.GetRecentWeatherDataByCity(InputConverter.GetStringCity(eCity));

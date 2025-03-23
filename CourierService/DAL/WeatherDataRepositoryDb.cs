@@ -7,12 +7,12 @@ namespace DAL;
 public class WeatherDataRepositoryDb
 {
     private readonly AppDbContext _context;
-    
+
     public WeatherDataRepositoryDb(AppDbContext context)
     {
         _context = context;
     }
-    
+
     public void FetchWeatherData()
     {
         string xmlPath = "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php";
@@ -30,7 +30,7 @@ public class WeatherDataRepositoryDb
             var timestampString = observationsNode.Attributes?["timestamp"]?.Value;
             long timestamp = long.TryParse(timestampString, out long timestampValue) ? timestampValue : 0;
             DateTime occurrenceTime = DateTimeOffset.FromUnixTimeSeconds(timestamp).DateTime;
-            
+
             XmlNodeList? stationNodes = xmlDoc.SelectNodes("/observations/station");
             if (stationNodes != null)
             {
@@ -40,8 +40,10 @@ public class WeatherDataRepositoryDb
                     if (stationName == "Tallinn-Harku" || stationName == "Tartu-Tõravere" || stationName == "Pärnu")
                     {
                         int? wmocode = Convert.ToInt32(stationNode["wmocode"]?.InnerText);
-                        double? airTemperature = Convert.ToDouble(stationNode["airtemperature"]?.InnerText, CultureInfo.InvariantCulture);
-                        double? windSpeed = Convert.ToDouble(stationNode["windspeed"]?.InnerText, CultureInfo.InvariantCulture);
+                        double? airTemperature = Convert.ToDouble(stationNode["airtemperature"]?.InnerText,
+                            CultureInfo.InvariantCulture);
+                        double? windSpeed = Convert.ToDouble(stationNode["windspeed"]?.InnerText,
+                            CultureInfo.InvariantCulture);
                         string? phenomenon = stationNode["phenomenon"]?.InnerText;
 
                         Console.WriteLine("Station Name: " + stationName);
@@ -71,7 +73,7 @@ public class WeatherDataRepositoryDb
             }
         }
     }
-    
+
     private void SaveData(WeatherData weatherData)
     {
         _context.WeatherDataCollection.Add(weatherData);
@@ -82,6 +84,7 @@ public class WeatherDataRepositoryDb
     {
         return _context.WeatherDataCollection.ToList();
     }
+
     public WeatherData GetRecentWeatherDataByCity(string city)
     {
         var recentData = _context.WeatherDataCollection
@@ -92,9 +95,7 @@ public class WeatherDataRepositoryDb
         {
             return recentData;
         }
+
         throw new ArgumentException($"No entry found for city: {city}");
     }
-    
-    
 }
-
